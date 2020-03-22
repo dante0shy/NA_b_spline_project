@@ -3,7 +3,7 @@ from scipy.misc import derivative
 
 class BSpline():
 
-    def __init__(self, interval = 0.01, degree = 3, p_mode = 0):
+    def __init__(self, interval = 0.01, degree = 3, p_mode = 1):
         self.interpolation_points = None
         self.degree = degree
         self.interval = interval
@@ -32,7 +32,7 @@ class BSpline():
                 tmp.append(up_n/ down)
             else:
                 tmp.append(0)
-        tmp[-1] = tmp[-1] #- 0.000001
+        tmp[-1] = tmp[-1] - 0.000001
         return np.array(tmp)
 
     def divide(self, i, j):
@@ -84,8 +84,8 @@ class BSpline():
 
         for i in range(self.degree):
             N[1,i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
-            # N[-2,-self.degree+i] = self.d_B_spline_basis(self.parameterization_vector[-1],self.knot,i + self.size_n -1,self.degree, self.degree-1)
-            N[-2,-1-i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
+            N[-2,-self.degree+i] = self.d_B_spline_basis(self.parameterization_vector[-1],self.knot,i + self.size_n -1,self.degree, self.degree-1)
+            # N[-2,-1-i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
 
         D = np.zeros([self.size_n+2,2])
         D[2:-2] =input[1 : -1]
