@@ -1,8 +1,9 @@
 import numpy as np
+from scipy.misc import derivative
 
 class BSpline():
 
-    def __init__(self, interval = 0.01, degree = 3, p_mode = 1):
+    def __init__(self, interval = 0.01, degree = 3, p_mode = 0):
         self.interpolation_points = None
         self.degree = degree
         self.interval = interval
@@ -31,17 +32,37 @@ class BSpline():
                 tmp.append(up_n/ down)
             else:
                 tmp.append(0)
+        tmp[-1] = tmp[-1] #- 0.000001
         return np.array(tmp)
 
     def divide(self, i, j):
         return  i/j if j else 0
 
-    def B_spline_basis(self, k,t,  i, j, d):
-        if d == 0 :
-            return 1 if i==j else 0
-        return self.divide(k[j] - k[i], k[i + d] - k[i]) * self.B_spline_basis(k,t,  i, j, d-1) + \
-               self.divide(k[i + d + 1] - k[j], k[i + d + 1] - k[i + 1]) * self.B_spline_basis(k,t,  i + 1, j, d-1)
 
+    def get_t(self,t,k):
+        return 1 if k>=len(t) else (0 if k<0 else t[k] )
+
+    def B_spline_basis(self, t,k, j, d):
+
+        if d == 0 :
+            return 1 if  (k[j] == t or (k[j+1]> t and k[j] <= t))  else 0
+        return self.divide(t - k[j], k[j + d] - k[j])* self.B_spline_basis(t,  k, j, d-1) + \
+               self.divide(k[j + d+1] - t, k[j + d+1]  - k[j +1]) * self.B_spline_basis(t,  k , j+ 1, d-1)
+
+    def d_B_spline_basis(self, t,k, j, d,de):
+        if de == 1 :
+            return d * (
+                self.divide(self.B_spline_basis(t, k, j, d - 1) , k[j + d] - k[j]) -
+                self.divide(self.B_spline_basis(t, k, j+1, d - 1) , k[j + d+1] - k[j+1])
+            )
+        elif de > 1:
+            return d * (
+                    self.divide(self.d_B_spline_basis(t, k, j, d - 1,de -1), k[j + d] - k[j]) -
+                    self.divide(self.d_B_spline_basis(t, k, j + 1, d - 1,de -1), k[j + d + 1] - k[j + 1])
+            )
+
+        # return self.divide(t - k[j], k[j + d] - k[j])* self.B_spline_basis(t,  k, j, d-1) + \
+        #        self.divide(k[j + d+1] - t, k[j + d+1]  - k[j +1]) * self.B_spline_basis(t,  k , j+ 1, d-1)
 
     def fit(self, input):
         assert input.shape[0] > 1
@@ -53,152 +74,44 @@ class BSpline():
         self.knot = np.append([0] * self.degree, self.knot)
         self.knot = np.append(self.knot, [1] * self.degree)
 
-        self.a = self.input[:,1]
-        h = np.diff(input[:,0])
-        A = self.__calc_A(h)
-        B = self.__calc_B(h)
+        N = np.zeros([self.size_n+2,self.size_n+self.degree -1 ])
+        N[0,0] = 1
+        N[-1,-1] = 1
+        for i in range(1,self.size_n):
+            for j in range(1,self.size_n+self.degree -1):
+                N[i+1,j] = self.B_spline_basis(self.parameterization_vector[i],self.knot,j,self.degree)
+        pass
 
+        for i in range(self.degree):
+            N[1,i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
+            # N[-2,-self.degree+i] = self.d_B_spline_basis(self.parameterization_vector[-1],self.knot,i + self.size_n -1,self.degree, self.degree-1)
+            N[-2,-1-i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
 
-        return
+        D = np.zeros([self.size_n+2,2])
+        D[2:-2] =input[1 : -1]
+        D[0] = input[0]
+        D[-1] = input[-1]
+        # self.a = self.input[:,1]
+        c_0 = np.linalg.solve(N, D[:,0])#.astype(np.float16)
+        c_1 = np.linalg.solve(N, D[:,1])#.astype(np.float16)
+        self.c = np.hstack((c_0.reshape(-1,1),c_1.reshape(-1,1)))
+        # h = np.diff(input[:,0])
+        # A = self.__calc_A(h)
+        # B = self.__calc_B(h)
+        # return
 
-    def __calc_A(self, h):
-        u"""
-        calc matrix A for spline coefficient c
-        """
-        A = np.zeros((self.size_n, self.size_n))
-        A[0, 0] = 1.0
-        for i in range(self.size_n - 1):
-            if i != (self.size_n - 2):
-                A[i + 1, i + 1] = 2.0 * (h[i] + h[i + 1])
-            A[i + 1, i] = h[i]
-            A[i, i + 1] = h[i]
-        A[0, 1] = 0.0
-        A[self.size_n - 1, self.size_n - 2] = 0.0
-        A[self.size_n - 1, self.size_n - 1] = 1.0
-        #  print(A)
-        return A
+    def get_interpolation(self,d = 0.0001):
+        # t = np.arange(0.,1.0,d)
+        # j = 0
+        time = np.arange(0.,1.0,d)
+        a = np.zeros((time.shape[0]+1 ,2))
+        for ind , t in enumerate(time):
+            N = np.zeros(self.c.shape[0])
+            n_p = np.zeros((self.c.shape[0],2))
+            for i,p in enumerate(self.c):
+                N[i] = self.B_spline_basis(t,self.knot,i,self.degree)
+                n_p[i] =  p * N[i]
+            a[ind] = np.sum(n_p,0)
 
-    def __calc_B(self, h):
-        u"""
-        calc matrix B for spline coefficient c
-        """
-        B = np.zeros(self.size_n)
-        for i in range(self.size_n - 2):
-            B[i + 1] = 3.0 * (self.a[i + 2] - self.a[i + 1]) / \
-                       h[i + 1] - 3.0 * (self.a[i + 1] - self.a[i]) / h[i]
-        #  print(B)
-        return B
-
-    class Spline:
-        u"""
-        Cubic Spline class
-        """
-
-        def __init__(self, x, y):
-            self.b, self.c, self.d, self.w = [], [], [], []
-
-            self.x = x
-            self.y = y
-
-            self.nx = len(x)  # dimension of x
-            h = np.diff(x)
-
-            # calc coefficient c
-            self.a = [iy for iy in y]
-
-            # calc coefficient c
-            A = self.__calc_A(h)
-            B = self.__calc_B(h)
-            self.c = np.linalg.solve(A, B)
-            #  print(self.c1)
-
-            # calc spline coefficient b and d
-            for i in range(self.nx - 1):
-                self.d.append((self.c[i + 1] - self.c[i]) / (3.0 * h[i]))
-                tb = (self.a[i + 1] - self.a[i]) / h[i] - h[i] * \
-                     (self.c[i + 1] + 2.0 * self.c[i]) / 3.0
-                self.b.append(tb)
-
-        def calc(self, t):
-            u"""
-            Calc position
-            if t is outside of the input x, return None
-            """
-
-            if t < self.x[0]:
-                return None
-            elif t > self.x[-1]:
-                return None
-
-            i = self.__search_index(t)
-            dx = t - self.x[i]
-            result = self.a[i] + self.b[i] * dx + \
-                     self.c[i] * dx ** 2.0 + self.d[i] * dx ** 3.0
-
-            return result
-
-        def calcd(self, t):
-            u"""
-            Calc first derivative
-            if t is outside of the input x, return None
-            """
-
-            if t < self.x[0]:
-                return None
-            elif t > self.x[-1]:
-                return None
-
-            i = self.__search_index(t)
-            dx = t - self.x[i]
-            result = self.b[i] + 2.0 * self.c[i] * dx + 3.0 * self.d[i] * dx ** 2.0
-            return result
-
-        def calcdd(self, t):
-            u"""
-            Calc second derivative
-            """
-
-            if t < self.x[0]:
-                return None
-            elif t > self.x[-1]:
-                return None
-
-            i = self.__search_index(t)
-            dx = t - self.x[i]
-            result = 2.0 * self.c[i] + 6.0 * self.d[i] * dx
-            return result
-
-        def __search_index(self, x):
-            u"""
-            search data segment index
-            """
-            return bisect.bisect(self.x, x) - 1
-
-        def __calc_A(self, h):
-            u"""
-            calc matrix A for spline coefficient c
-            """
-            A = np.zeros((self.nx, self.nx))
-            A[0, 0] = 1.0
-            for i in range(self.nx - 1):
-                if i != (self.nx - 2):
-                    A[i + 1, i + 1] = 2.0 * (h[i] + h[i + 1])
-                A[i + 1, i] = h[i]
-                A[i, i + 1] = h[i]
-
-            A[0, 1] = 0.0
-            A[self.nx - 1, self.nx - 2] = 0.0
-            A[self.nx - 1, self.nx - 1] = 1.0
-            #  print(A)
-            return A
-
-        def __calc_B(self, h):
-            u"""
-            calc matrix B for spline coefficient c
-            """
-            B = np.zeros(self.nx)
-            for i in range(self.nx - 2):
-                B[i + 1] = 3.0 * (self.a[i + 2] - self.a[i + 1]) / \
-                           h[i + 1] - 3.0 * (self.a[i + 1] - self.a[i]) / h[i]
-            #  print(B)
-            return B
+        a[-1] = self.c[-1]
+        return a
