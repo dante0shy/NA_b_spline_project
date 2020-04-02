@@ -32,7 +32,7 @@ class BSpline():
                 tmp.append(up_n/ down)
             else:
                 tmp.append(0)
-        tmp[-1] = tmp[-1] - 0.000001
+        # tmp[-1] = tmp[-1] - 0.000001
         return np.array(tmp)
 
     def divide(self, i, j):
@@ -70,7 +70,8 @@ class BSpline():
         self.parameterization_vector = self.parameterization(input)
 
         self.size_n = input.shape[0]
-        self.knot = self.parameterization_vector#np.linspace(0, 1, size - (self.degree-1), endpoint=True)
+        self.knot = np.copy(self.parameterization_vector)#np.linspace(0, 1, size - (self.degree-1), endpoint=True)
+        # self.knot[-1] = self.knot[-1] - 0.000001
         self.knot = np.append([0] * self.degree, self.knot)
         self.knot = np.append(self.knot, [1] * self.degree)
 
@@ -84,7 +85,7 @@ class BSpline():
 
         for i in range(self.degree):
             N[1,i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
-            N[-2,-self.degree+i] = self.d_B_spline_basis(self.parameterization_vector[-1],self.knot,i + self.size_n -1,self.degree, self.degree-1)
+            N[-2,-self.degree+i] = self.d_B_spline_basis(self.parameterization_vector[-1] - 0.000001,self.knot,i + self.size_n -1,self.degree, self.degree-1)
             # N[-2,-1-i] = self.d_B_spline_basis(self.parameterization_vector[0],self.knot,i,self.degree, self.degree-1)#
 
         D = np.zeros([self.size_n+2,2])
@@ -115,3 +116,17 @@ class BSpline():
 
         a[-1] = self.c[-1]
         return a
+
+    def org_config(self):
+        txt = ''
+        txt += '{:0>2d}\n'.format(self.degree)
+        txt += '{:0>2d}\n'.format(self.c.shape[0])
+        tmp = ''
+        for x in self.knot:
+            tmp+= '{} '.format(x)
+        txt += tmp + '\n'
+        for x in self.c:
+            txt+= '{} {}\n'.format(x[0],x[1])
+
+        return txt
+
