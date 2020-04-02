@@ -132,3 +132,4 @@ train/*/snap/*
 train/*/*.out
 train/*/performance.md
 *.out
+*.png
