@@ -16,7 +16,6 @@ Install:
 Usage :
 
     Some effects of curve are as next:
-![image](http://github.com/itmyhome2013/readme_add_pic/raw/master/images/nongshalie.jpg)
-![image](http://github.com/itmyhome2013/readme_add_pic/raw/master/images/nongshalie.jpg)
+        ![img](extras/10p1.png)
 
-
+        ![img](extras/5p1.png)
