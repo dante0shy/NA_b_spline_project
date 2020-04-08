@@ -23,6 +23,6 @@ Usage:
 
     Draw: display the curve based on the setting on the left side
     Add point: add a point for current setting
-    Degree: the degree for the curve
+    Degree: the degree for the curve (he input should be a int)
     Paramerterzation: the paramerterzation setting
     Points input: the order of input is (x,y), del button on the left side is for removing the point for the curve
