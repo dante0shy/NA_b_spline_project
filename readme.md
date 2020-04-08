@@ -16,6 +16,6 @@ Install:
 Usage :
 
     Some effects of curve are as next:
-        ![img](extras/10p1.png)
 
-        ![img](extras/5p1.png)
+        ![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
+        ![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
