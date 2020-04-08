@@ -15,4 +15,7 @@ Install:
 
 Usage :
 
-    
+    Some effects of curve are as next:
+        ![avatar](extras/10p1.png)
+        
+        ![avatar](extras/10p1.png)
