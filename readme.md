@@ -12,6 +12,8 @@ Install:
     cd NA_b_spline_project
     pip install -r requirement.txt
 
+The algorithmn is based on the cubic b-spline interpolation.
+I realize the basic interpolation and some other function like paramerterzation method and changable degree(other degree modifies the algorithmn not to a cubic b-spline).
 Some effects of curve are as next:
 
 ![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
