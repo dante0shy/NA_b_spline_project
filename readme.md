@@ -12,10 +12,7 @@ Install:
     cd NA_b_spline_project
     pip install -r requirement.txt
 
+Some effects of curve are as next:
 
-Usage :
-
-    Some effects of curve are as next:
-
-        ![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
-        ![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
+![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
+![image](https://github.com/dante0shy/NA_b_spline_project/raw/master/extras/10p1.png)
