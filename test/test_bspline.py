@@ -17,8 +17,12 @@ output = os.path.join(project_path,'extras', 'output_config')
 if not os.path.exists(output) or not os.path.isdir(output):
     os.mkdir(output)
 
+interval = 0.01
+degree= 3
+p_mode=1
+f_name = "test_case_2.txt"
+
 if __name__ == "__main__":
-    f_name = "test_case_2.txt"
     file_path = os.path.join(
             input_path,
             f_name,
@@ -26,7 +30,7 @@ if __name__ == "__main__":
     control_points = open(
         file_path
     ).readlines()
-    b_splines = BSpline()
+    b_splines = BSpline(interval = interval, degree= degree ,p_mode= p_mode)
     control_points = np.array([ [float(y) for y in x.strip().split(' ')] for x in control_points  if x.strip()])
     b_splines.fit(control_points)
     curve  = b_splines.get_interpolation()
