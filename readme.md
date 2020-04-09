@@ -24,7 +24,6 @@ Usage:
 
     Draw: display the curve based on the setting on the left side
     Add point: add a point for current setting
-    Degree: the degree for the curve (he input should be a int)
     Paramerterzation: the paramerterzation setting
     Points input: the order of input is (x,y), del button on the left side is for removing the point for the curve
 
@@ -36,7 +35,6 @@ You may also want to use the script to display the results. The command is as be
 The setting of b-spline can be changed in the script with:
 
     interval: sample points interval (default is 0.01)
-    degree: degree for interpolation
     p_mode: paramerterzation methods (default is 1 for Chord length, 0 for Uniform)
     f_name: file name for points setting (place in extras)
 

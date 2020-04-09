@@ -20,7 +20,7 @@ if not os.path.exists(output) or not os.path.isdir(output):
 interval = 0.01
 degree= 3
 p_mode=1
-f_name = "test_case_2.txt"
+f_name = "test_case_0.txt"
 
 if __name__ == "__main__":
     file_path = os.path.join(

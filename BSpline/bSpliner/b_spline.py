@@ -1,11 +1,11 @@
 import numpy as np
-from scipy.misc import derivative
+# from scipy.misc import derivative
 
 class BSpline():
 
     def __init__(self, interval = 0.01, degree = 3, p_mode = 1):
         self.interpolation_points = None
-        self.degree = degree
+        self.degree = 3 #degree
         self.interval = interval
         self.knot = None
         self.p_mode = p_mode
@@ -75,7 +75,8 @@ class BSpline():
         self.knot = np.append([0] * self.degree, self.knot)
         self.knot = np.append(self.knot, [1] * self.degree)
 
-        N = np.zeros([self.size_n+2,self.size_n+self.degree -1 ])
+        N = np.zeros([self.size_n+self.degree -1,self.size_n+self.degree -1 ])
+        # N = np.zeros([self.size_n+2,self.size_n+self.degree -1 ])
         N[0,0] = 1
         N[-1,-1] = 1
         for i in range(1,self.size_n):
@@ -93,6 +94,7 @@ class BSpline():
         D[0] = input[0]
         D[-1] = input[-1]
         # self.a = self.input[:,1]
+        N = np.nan_to_num(N,nan= 0.1)
         c_0 = np.linalg.solve(N, D[:,0])#.astype(np.float16)
         c_1 = np.linalg.solve(N, D[:,1])#.astype(np.float16)
         self.c = np.hstack((c_0.reshape(-1,1),c_1.reshape(-1,1)))
