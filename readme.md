@@ -1,4 +1,5 @@
-===BSpline visualizer
+BSpline visualizer
+==================================
 
 A simple visualizer for B-Spline algorithmn
 
